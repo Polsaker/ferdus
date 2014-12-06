@@ -40,20 +40,19 @@ class IRCClient:
         #self.addhandler("pubmsg", self._pubmsg)
 
         # Internal handlers used to get user/channel information
-        # NO NECESARIO PARA EL FLOODBOT
-        #self.addhandler("join", self._on_join)
-        #self.addhandler("currenttopic", self._on_topic)
-        #self.addhandler("topic", self._on_topic)
-        #self.addhandler("topicinfo", self._on_topicinfo)
-        #self.addhandler("whospcrpl", self._on_whox)
-        #self.addhandler("whoreply", self._on_who)
-        #self.addhandler("whoisloggedin", self._on_whoisaccount)
-        #self.addhandler("mode", self._on_mode)
-        #self.addhandler("quit", self._on_quit)
-        #self.addhandler("part", self._on_part)
-        #self.addhandler("kick", self._on_kick)
-        #self.addhandler("banlist", self._on_banlist)
-        #self.addhandler("kick", self._on_quietlist)
+        self.addhandler("join", self._on_join)
+        self.addhandler("currenttopic", self._on_topic)
+        self.addhandler("topic", self._on_topic)
+        self.addhandler("topicinfo", self._on_topicinfo)
+        self.addhandler("whospcrpl", self._on_whox)
+        self.addhandler("whoreply", self._on_who)
+        self.addhandler("whoisloggedin", self._on_whoisaccount)
+        self.addhandler("mode", self._on_mode)
+        self.addhandler("quit", self._on_quit)
+        self.addhandler("part", self._on_part)
+        self.addhandler("kick", self._on_kick)
+        self.addhandler("banlist", self._on_banlist)
+        self.addhandler("kick", self._on_quietlist)
 
     def configure(self, server=server, port=port, nick=nickname, ident=nickname,
                 gecos=gecos, ssl=ssl, msgdelay=msgdelay, reconnects=reconnects):
@@ -542,7 +541,6 @@ class Event(object):
     def __init__(self, type, source, target, arguments=None):
         self.type = type
         self.source = source
-        self.source2 = source
         self.target = target
         if arguments is None:
             arguments = []
@@ -550,10 +548,11 @@ class Event(object):
         if type == "privmsg" or type == "pubmsg" or type == "ctcpreply" or type\
         == "ctcp" or type == "pubnotice" or type == "privnotice":
             if not is_channel(target):
-                self.target = parse_nick(source)[1]
+                self.target = source.nick
             if not is_channel(source):
-                self.source = parse_nick(source)[1]
+                self.source = source.nick
             self.splitd = arguments[0].split()
+        self.source2 = source
 
 
 class LineBuffer(object):
