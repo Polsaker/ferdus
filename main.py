@@ -142,15 +142,15 @@ def publmsg(cli, ev):
     try:
         if _PARROT[ev.target] is True:
             cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
+        elif cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN:
+            cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
+            cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
+            _PARROT[ev.target] = True
+            time.sleep(300)
+            cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
+            _PARROT[ev.target] = False
     except:
         pass
-    if cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN:
-        cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
-        cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
-        _PARROT[ev.target] = True
-        time.sleep(300)
-        cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
-        _PARROT[ev.target] = False
             
 # --- command stuff ---
 
@@ -304,20 +304,19 @@ def kill_the_enemy(cli, ev, tfilter):
     elif tfilter.Type == "hostmask":
         codename = "h" + str(tfilter.id)
     
-    cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter.label))
+    cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered @ \002{4}\002: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter.label, ev.target))
 
 # --- parrot ---
 def parrot(cli, ev, k=False):
-    if cli.nickname in " ".join(ev.arguments) and not k and ev.target != CONTROLCHAN:
-        cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
-        parrot(cli, ev, True)
-        _PARROT[ev.target] = True
-        time.sleep(300)
-        cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
-        _PARROT[ev.target] = False
-        return
     try:
         if _PARROT[ev.target] is not True:
+            if cli.nickname in " ".join(ev.arguments) and not k and ev.target != CONTROLCHAN:
+                cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
+                parrot(cli, ev, True)
+                _PARROT[ev.target] = True
+                time.sleep(300)
+                cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
+                _PARROT[ev.target] = False
             return
     except:
         return
