@@ -3,7 +3,7 @@
 # <config>
 NICKNAME = "ferdus"
 NSPASSWORD = "iamsuperferdus"
-IRCSERVER = "chat.freenode.net"
+IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
 BINDTO = "2001:1b40:5000:ff3::5:b00b"
 
