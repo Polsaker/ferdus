@@ -142,15 +142,15 @@ def publmsg(cli, ev):
     try:
         if _PARROT[ev.target] is True:
             cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
-        elif cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN:
-            cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
-            cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
-            _PARROT[ev.target] = True
-            time.sleep(300)
-            cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
-            _PARROT[ev.target] = False
     except:
-        pass
+        _PARROT[ev.target] = False
+    if cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN and _PARROT[ev.target] == False:
+        cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
+        _PARROT[ev.target] = True
+        time.sleep(300)
+        cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
+        _PARROT[ev.target] = False
             
 # --- command stuff ---
 
