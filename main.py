@@ -178,7 +178,8 @@ def chanpattern(cli, ev):
         return
         
     if ev.splitd[1] == "add":
-        channels = json.dumps(ev.splitd[3:].lower().split())
+        [x.lower() for x in ev.splitd[3:]]
+        channels = json.dumps([x.lower() for x in ev.splitd[3:]])
         filt = ChanFilter.create(hostmask=ev.splitd[2], content=channels)
         cli.privmsg(CONTROLCHAN, "Filter created (ID: \002c{0}\002)".format(filt.id))
     elif ev.splitd[1] == "list":
