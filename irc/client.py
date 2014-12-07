@@ -326,7 +326,7 @@ class IRCClient:
         self.send("JOIN {0}".format(channels))
     
     def part(self, channels, message=""):
-        self.send("PART {0} :{qu1}".format(channels, message))
+        self.send("PART {0} :{1}".format(channels, message))
 
     def who(self, target="", op=""):
         self.send("WHO%s%s" % (target and (" " + target), op and (" " + op)))
