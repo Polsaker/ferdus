@@ -70,8 +70,6 @@ Channel.create_table(True)
 def welcome(client, event): # When we're connected to the irc...
     _CONNECTED = True
     client.join(CONTROLCHAN) # ... we join the control channel
-    for channel in Channel.select():
-        client.join(channel.name)
     
 def oconnect(client, event): # Phew, we're connecting to the server...
     # Let's try to do some SASL
@@ -245,6 +243,11 @@ def privmsgfilter(cli, ev):
                 #eat_the_cooked_enemy(...)
     
 def joinfilter(cli, ev):
+    if ev.target == CONTROLCHAN:
+        for channel in Channel.select():
+            client.join(channel.name)
+        return
+    
     # Hostmask filter:
     for filt in HostMaskFilter.select():
         regex = re.compile(filt.hostmask)
