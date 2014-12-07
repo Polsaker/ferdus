@@ -245,7 +245,7 @@ def privmsgfilter(cli, ev):
 def joinfilter(cli, ev):
     if ev.target == CONTROLCHAN:
         for channel in Channel.select():
-            client.join(channel.name)
+            cli.join(channel.name)
         return
     
     # Hostmask filter:
