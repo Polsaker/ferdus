@@ -2,6 +2,7 @@
 
 # <config>
 NICKNAME = "ferdus"
+NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
@@ -79,7 +80,7 @@ def oconnect(client, event): # Phew, we're connecting to the server...
 
 def saslauth(client, event): # Finish sasl authentication
     client.send("AUTHENTICATE {0}".format(
-        base64.b64encode("{0}\0{0}\0{1}".format(NICKNAME, NSPASSWORD).encode()).decode()))
+        base64.b64encode("{0}\0{0}\0{1}".format(NSUSER, NSPASSWORD).encode()).decode()))
     client.send("CAP END")
     
 def ctcp(cli, event):

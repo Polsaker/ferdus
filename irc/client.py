@@ -453,8 +453,8 @@ class IRCClient:
                 pass
 
     def _on_kick(self, myself, event):
-        if event.source.nick != self.nickname:
-            del self.channels[event.target].users[event.source.nick]
+        if event.arguments[0] != self.nickname:
+            del self.channels[event.target].users[event.arguments[0]]
     
     def _on_banlist(self, myself, event):
         ban = Ban(event.arguments[1], event.arguments[3])
