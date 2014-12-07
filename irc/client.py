@@ -439,9 +439,9 @@ class IRCClient:
     def _on_quit(self, myself, event):
         #del self.users[event.source.nick]
         for i in self.channels:
-            self._fire_event(Event("cquit", event.source, i, event.arguments))
             try:
                 del self.channels[i].users[event.source.nick]
+                self._fire_event(Event("cquit", event.source, i, event.arguments))
             except:
                 pass
 

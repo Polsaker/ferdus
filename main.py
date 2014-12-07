@@ -148,6 +148,7 @@ def publmsg(cli, ev):
         cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
         _PARROT[ev.target] = True
         time.sleep(300)
+        cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
         _PARROT[ev.target] = False
             
 # --- command stuff ---
@@ -300,11 +301,12 @@ def kill_the_enemy(cli, ev, tfilter):
 
 # --- parrot ---
 def parrot(cli, ev, k=False):
-    if cli.nickname in " ".join(ev.arguments) and not k:
+    if cli.nickname in " ".join(ev.arguments) and not k and ev.target != CONTROLCHAN:
         cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
         parrot(cli, ev, True)
         _PARROT[ev.target] = True
         time.sleep(300)
+        cli.privmsg(CONTROLCHAN, "Parrot mode deactivated on \002{0}\002".format(ev.target))
         _PARROT[ev.target] = False
         return
     try:
