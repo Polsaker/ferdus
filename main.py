@@ -297,7 +297,14 @@ def kill_the_enemy(cli, ev, tfilter):
     cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter.label))
 
 # --- parrot ---
-def parrot(cli, ev):
+def parrot(cli, ev, k=False):
+    if cli.nickname in " ".join(ev.arguments) and not k:
+        cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
+        parrot(cli, ev, True)
+        _PARROT[ev.target] = True
+        time.sleep(300)
+        _PARROT[ev.target] = False
+        return
     try:
         if _PARROT[ev.target] is not True:
             return
