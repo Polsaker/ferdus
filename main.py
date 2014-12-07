@@ -122,6 +122,12 @@ def publmsg(cli, ev):
             label(cli, ev)
         elif ev.splitd[0] == ".channels":
             cli.privmsg(CONTROLCHAN, " ".join(cli.channels))
+        elif ev.splitd[0] == ".msg":
+            cli.privmsg(ev.splitd[1], " ".join(ev.splitd[2:]))
+        elif ev.splitd[0] == ".notice":
+            cli.notice(ev.splitd[1], " ".join(ev.splitd[2:]))
+        elif ev.splitd[0] == ".raw":
+            cli.send(" ".join(ev.splitd[1:]))
             
 # --- command stuff ---
 
