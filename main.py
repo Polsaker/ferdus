@@ -21,6 +21,7 @@ import socket
 
 # _USERDB[username]['channels'] = ['#list', '#of', '#channels']
 _USERDB = {}
+_PARROT = {}
 _CONNECTED = False
 
 logging.getLogger(None).setLevel(logging.DEBUG)
@@ -128,6 +129,24 @@ def publmsg(cli, ev):
             cli.notice(ev.splitd[1], " ".join(ev.splitd[2:]))
         elif ev.splitd[0] == ".raw":
             cli.send(" ".join(ev.splitd[1:]))
+        elif ev.splitd[0] == ".parrot":
+            if ev.splitd[1] == "on":
+                _PARROT[ev.splitd[2]] = True
+                cli.privmsg(CONTROLCHAN, "Enabled parrot mode for \002{0}\002".format(ev.splitd[2]))
+            else:
+                _PARROT[ev.splitd[2]] = False
+                cli.privmsg(CONTROLCHAN, "Disabled parrot mode for \002{0}\002".format(ev.splitd[2]))
+    try:
+        if _PARROT[ev.target] is True:
+            cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
+    except:
+        pass
+    if cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN:
+        cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
+        _PARROT[ev.target] = True
+        time.sleep(300)
+        _PARROT[ev.target] = False
             
 # --- command stuff ---
 
@@ -277,6 +296,26 @@ def kill_the_enemy(cli, ev, tfilter):
     
     cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter.label))
 
+# --- parrot ---
+def parrot(cli, ev):
+    try:
+        if _PARROT[ev.target] is not True:
+            return
+    except:
+        return
+    if ev.type == "mode":
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] Mode change by \037{1}\037: {2}".format(ev.target, ev.source, " ".join(ev.arguments)))
+    elif ev.type == "kick":
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] \037{1}\037 kicked by {2} (Reason: {3})".format(ev.target, ev.arguments[0], ev.source, ev.arguments[1]))
+    elif ev.type == "notice":
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] -{1}- {2}".format(ev.target, ev.source, ev.arguments[0]))
+    elif ev.type == "part":
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] \037{1}\037 left the channel \002{2}\002".format(ev.target, ev.source, " ".join(ev.arguments)))
+    elif ev.type == "join":
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] \037{1}\037 joined the channel".format(ev.target, ev.source))
+    elif ev.type == "cquit":
+        cli.privmsg(CONTROLCHAN, "[\002{0}\002] \037{1}\037 has quit".format(ev.target, ev.source, " ".join(ev.arguments)))
+
 # --- handler registration ---
 connection.addhandler("welcome", welcome)
 connection.addhandler("connect", oconnect)
@@ -290,6 +329,14 @@ connection.addhandler("pubmsg", publmsg)
 
 connection.addhandler("join", joinfilter)
 connection.addhandler("pubmsg", privmsgfilter)
+
+connection.addhandler("mode", parrot)
+connection.addhandler("kick", parrot)
+connection.addhandler("pubnotice", parrot)
+connection.addhandler("join", parrot)
+connection.addhandler("part", parrot)
+connection.addhandler("cquit", parrot)
+
 
 
 # Now we connect to the irc and loop forever
