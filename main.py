@@ -282,7 +282,7 @@ def joinfilter(cli, ev):
 def kill_the_enemy(cli, ev, tfilter):
     # Freenode stuff, get the actual ip, removing the gateway stuff
     if "gateway/web/cgi-irc" in ev.source2 or "gateway/web/freenode" in ev.source2:
-        ban = "*!*@*" + ev.source2.split("/")[-1]
+        ban = "*!*@*" + ev.source2.split("/ip.")[-1]
     elif "gateway/tor-sasl/" in ev.source2.host:
         ban = "*!*@*" + ev.source2.host[17:]
     elif "gateway/" in ev.source2:
