@@ -110,7 +110,7 @@ def publmsg(cli, ev):
             Channel.create(name=ev.splitd[1])
             cli.privmsg(CONTROLCHAN, "Joined \002{0}\002 and added it to the autojoin list".format(ev.splitd[1]))
         elif ev.splitd[0] == ".part":
-            cli.part(ev.splitd[1])
+            cli.part(ev.splitd[1], "Leaving")
             chan = Channel.get(Channel.name == ev.splitd[1])
             chan.delete_instance()
             cli.privmsg(CONTROLCHAN, "Parted \002{0}\002 and deleted it from the autojoin list".format(ev.splitd[1]))
@@ -132,6 +132,8 @@ def publmsg(cli, ev):
             cli.notice(ev.splitd[1], " ".join(ev.splitd[2:]))
         elif ev.splitd[0] == ".raw":
             cli.send(" ".join(ev.splitd[1:]))
+        elif ev.splitd[0] == ".quit":
+            cli.disconnect("Leaving")
         elif ev.splitd[0] == ".parrot":
             if ev.splitd[1] == "on":
                 _PARROT[ev.splitd[2]] = True
