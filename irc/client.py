@@ -380,9 +380,16 @@ class IRCClient:
             except:
                 pass
 
-    def _on_whox(self, myself, event):
-        if event.arguments[0] == "08":
-            self.channels[event.arguments[1]].addUser(event)
+    def _on_whox(self, myself, e):
+        if e.arguments[0] == "08":
+            self.channels[e.arguments[1]].users[e.arguments[4]] = User(
+                    e.arguments[4],
+                    e.arguments[2],
+                    e.arguments[3],
+                    e.arguments[7],
+                    e.arguments[5],
+                    e.arguments[6]
+                )
 
     def _on_mode(self, myself, event):
         status = ""
@@ -459,16 +466,15 @@ class IRCClient:
 
 
 class Channel(object):
-    name = None
-    topic = None
-    topicsetter = None
-    topicsetterts = None
-    users = {}
-    cli = None
-    bans = []
-    quiets = []
-
     def __init__(self, client, channelname):
+        self.name = None
+        self.topic = None
+        self.topicsetter = None
+        self.topicsetterts = None
+        self.users = {}
+        self.cli = None
+        self.bans = []
+        self.quiets = []
         self.cli = client
         self.name = channelname
         try:
@@ -504,7 +510,7 @@ class Channel(object):
                     e.arguments[6][2:],
                     e.arguments[5]
                 )
-        self.cli.users[e.arguments[4]] = self.users[e.arguments[4]]
+        #self.cli.users[e.arguments[4]] = self.users[e.arguments[4]]
 
     def __repr__(self):
         return "<Channel topic:'{0}', topicsetter:'{1}', topicsetterts:'{2}'" \
