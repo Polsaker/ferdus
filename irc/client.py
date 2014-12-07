@@ -84,7 +84,6 @@ class IRCClient:
                 .format(self.server, self.port, err))
             try:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                self.socket.bind((self.localaddress, 0))
                 self.socket.connect((self.server, self.port))
             except socket.error as err:
                 self.logger.error("Couldn't connect to {0}:{1}: {2}"

@@ -5,6 +5,7 @@ NICKNAME = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "chat.freenode.net"
 CONTROLCHAN = "##wowsuchban"
+BINDTO = "2001:1b40:5000:ff3::5:b00b"
 
 TRUST = ["wikimedia/Polsaker"]
 # </config>
@@ -29,7 +30,7 @@ database = peewee.SqliteDatabase('ferdus.db')
 database.connect()
 
 connection = client.IRCClient("ferdus")
-connection.configure(IRCSERVER, 6667, NICKNAME, NICKNAME, "realname")
+connection.configure(IRCSERVER, 6667, NICKNAME, NICKNAME, "realname", localaddress=BINDTO)
 
 # ---- DATABASE STUFF ----
 
