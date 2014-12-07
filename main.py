@@ -6,7 +6,7 @@ NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
-BINDTO = "2001:1b40:5000:ff3::5:b00b"
+BINDTO = ""
 
 TRUST = ["wikimedia/Polsaker"]
 # </config>
