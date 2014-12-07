@@ -22,6 +22,7 @@ class IRCClient:
     msgdelay = 0.5   # Demora en el envío de mensajes (para no caer por flood)
     reconnects = 10  # Intentos de reconectarse desde la ultima conexion fallida
     reconncount = 0  # Números de intentos de reconección realizados
+    localaddress = ''
 
     features = None
     ibuffer = None
@@ -55,7 +56,8 @@ class IRCClient:
         self.addhandler("kick", self._on_quietlist)
 
     def configure(self, server=server, port=port, nick=nickname, ident=nickname,
-                gecos=gecos, ssl=ssl, msgdelay=msgdelay, reconnects=reconnects):
+                gecos=gecos, ssl=ssl, msgdelay=msgdelay, reconnects=reconnects,
+                localaddress=localaddress):
         self.server = server
         self.port = port
         self.nickname = nick
@@ -63,6 +65,7 @@ class IRCClient:
         self.gecos = gecos
         self.ssl = ssl
         self.msgdelay = msgdelay
+        self.localaddress = localaddress
         
     def connect(self):
         """ Connects to the IRC server. """
@@ -71,17 +74,26 @@ class IRCClient:
             #self.socelf.socket.bind(("2607:f0d0:2001:000a::3", 0))
         #    self.socket.create_connection((self.server, self.port))
         
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
         try:
+            self.socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            self.socket.bind((self.localaddress, 0))
             self.socket.connect((self.server, self.port))
         except socket.error as err:
-            self.logger.error("No se pudo conectar a {0}:{1}: {2}"
+            self.logger.warning("Couldn't connect to {0}:{1}: {2}. Disabling IPv6"
                 .format(self.server, self.port, err))
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.bind((self.localaddress, 0))
+                self.socket.connect((self.server, self.port))
+            except socket.error as err:
+                self.logger.error("Couldn't connect to {0}:{1}: {2}"
+                    .format(self.server, self.port, err))
 
-            if self.reconncount <= self.reconnects:
-                self.reconncount += 1
-                self.connect()
-            return False
+                if self.reconncount <= self.reconnects:
+                    self.reconncount += 1
+                    self.connect()
+                return False
 
         self.connected = True
 

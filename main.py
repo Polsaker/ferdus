@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+# <config>
 NICKNAME = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "chat.freenode.net"
 CONTROLCHAN = "##wowsuchban"
 
 TRUST = ["wikimedia/Polsaker"]
+# </config>
 
 import logging
 from peewee import peewee
@@ -18,6 +20,7 @@ import socket
 
 # _USERDB[username]['channels'] = ['#list', '#of', '#channels']
 _USERDB = {}
+_CONNECTED = False
 
 logging.getLogger(None).setLevel(logging.DEBUG)
 logging.basicConfig()
@@ -38,17 +41,23 @@ class Channel(BaseModel):
     name = peewee.CharField()
     
 class ChanFilter(BaseModel):
-    Type = peewee.CharField(default="channel") # Legacy stuff
+    Type = "channel"
     label = peewee.CharField(default="No label")
     content = peewee.CharField()
     hostmask = peewee.CharField()
 
 class MsgFilter(BaseModel):
-    Type = peewee.CharField(default="message") # Legacy stuff
+    Type = "message"
     label = peewee.CharField(default="No label")
     content = peewee.CharField()
     hostmask = peewee.CharField()
 
+class HostMaskFilter(BaseModel):
+    Type = "hostmask"
+    label = peewee.CharField(default="No label")
+    hostmask = peewee.CharField()
+
+HostMaskFilter.create_table(True)
 ChanFilter.create_table(True)
 MsgFilter.create_table(True)
 Channel.create_table(True)
@@ -56,6 +65,7 @@ Channel.create_table(True)
 # ---- IRC STUFF ----
 
 def welcome(client, event): # When we're connected to the irc...
+    _CONNECTED = True
     client.join(CONTROLCHAN) # ... we join the control channel
     for channel in Channel.select():
         client.join(channel.name)
@@ -79,7 +89,7 @@ def ctcp(cli, event):
         cli.notice(event.source, "\001AREYOUAWIZARD Yes.\001")
         
 def gotmsg(cli, event):
-    if event.type == "ctcp" and event.arguments[0] == "ACTION" and client.is_channel(event.target):
+    if event.type == "ctcp" and event.arguments[0] == "ACTION" and client.is_channel(event.target) or _CONNECTED:
         return
     q = "a"
     if event.type[0] in ['a', 'e', 'i', 'o', 'u']:
@@ -88,6 +98,10 @@ def gotmsg(cli, event):
 
 def publmsg(cli, ev):
     if ev.target == CONTROLCHAN:
+        if not ev.source2.host in TRUST and ev.splitd[0][0] == ".":
+            cli.privmsg(CONTROLCHAN, "I don't trust you")
+            return
+            
         if ev.splitd[0] == ".join":
             cli.join(ev.splitd[1])
             Channel.create(name=ev.splitd[1])
@@ -101,8 +115,12 @@ def publmsg(cli, ev):
             chanpattern(cli, ev)
         elif ev.splitd[0] == ".msgpattern" or ev.splitd[0] == ".mf":
             msgpattern(cli, ev)
+        elif ev.splitd[0] == ".hostmakspattern" or ev.splitd[0] == ".hf":
+            hostmaskpattern(cli, ev)
         elif ev.splitd[0] == ".label" or ev.splitd[0] == ".l":
             label(cli, ev)
+        elif ev.splitd[0] == ".channels":
+            cli.privmsg(CONTROLCHAN, " ".join(cli.channels))
             
 # --- command stuff ---
 
@@ -129,10 +147,10 @@ def chanpattern(cli, ev):
         
     if ev.splitd[1] == "add":
         channels = json.dumps(ev.splitd[3:].lower().split())
-        filt = ChanFilter.create(hostmask=ev.splitd[2], Type="channel", content=channels)
+        filt = ChanFilter.create(hostmask=ev.splitd[2], content=channels)
         cli.privmsg(CONTROLCHAN, "Filter created (ID: \002c{0}\002)".format(filt.id))
     elif ev.splitd[1] == "list":
-        for filt in ChanFilter.select().where(ChanFilter.Type == "channel"):
+        for filt in ChanFilter.select():
             content = json.loads(filt.content)
             cli.privmsg(CONTROLCHAN, "\002c{0}\002: {1} —— {3} (Hostmask: {2})".format(filt.id, " ".join(content), filt.hostmask, filt.label))
     elif ev.splitd[1] == "del":
@@ -149,13 +167,31 @@ def msgpattern(cli, ev):
         return
         
     if ev.splitd[1] == "add":
-        filt = MsgFilter.create(hostmask=ev.splitd[2], Type="message", content=".*" + " ".join(ev.splitd[3:]) + ".*")
+        filt = MsgFilter.create(hostmask=ev.splitd[2], content=".*" + " ".join(ev.splitd[3:]) + ".*")
         cli.privmsg(CONTROLCHAN, "Filter created (ID: \002m{0}\002)".format(filt.id))
     elif ev.splitd[1] == "list":
-        for filt in MsgFilter.select().where(MsgFilter.Type == "message"):
+        for filt in MsgFilter.select():
             cli.privmsg(CONTROLCHAN, "\002m{0}\002: {1} —— {3} (Hostmask: {2})".format(filt.id, filt.content, filt.hostmask, filt.label))
     elif ev.splitd[1] == "del":
         filt = MsgFilter.get(MsgFilter.id == ev.splitd[2])
+        filt.delete_instance()
+        cli.privmsg(CONTROLCHAN, "Filter deleted")
+
+def hostmaskpattern(cli, ev):
+    try:
+        ev.splitd[1]
+    except:
+        cli.privmsg(CONTROLCHAN, "Adds on-join hostmask filters. Usage: .hostmaskpattern <add [hostmask regex (nick!user@host)]|del [id]|list>")
+        return
+        
+    if ev.splitd[1] == "add":
+        filt = HostMaskFilter.create(hostmask=ev.splitd[2])
+        cli.privmsg(CONTROLCHAN, "Filter created (ID: \002h{0}\002)".format(filt.id))
+    elif ev.splitd[1] == "list":
+        for filt in HostMaskFilter.select():
+            cli.privmsg(CONTROLCHAN, "\002h{0}\002: {1} —— {2}".format(filt.id, filt.hostmask, filt.label))
+    elif ev.splitd[1] == "del":
+        filt = HostMaskFilter.get(HostMaskFilter.id == ev.splitd[2])
         filt.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
 
@@ -163,7 +199,7 @@ def msgpattern(cli, ev):
 def privmsgfilter(cli, ev):
     if ev.target == CONTROLCHAN:
         return
-    for filt in MsgFilter.select().where(MsgFilter.Type == "message"):
+    for filt in MsgFilter.select():
         regex = re.compile(filt.hostmask)
         if re.search(regex, ev.source):
             regex2 = re.compile(filt.content)
@@ -176,6 +212,17 @@ def privmsgfilter(cli, ev):
                 #eat_the_cooked_enemy(...)
     
 def joinfilter(cli, ev):
+    # Hostmask filter:
+    for filt in HostMaskFilter.select():
+        regex = re.compile(filt.hostmask)
+        if re.search(regex, ev.source):
+            # MEEP MEEP MEEP MEEP MEEP MEEP MEEP
+            # MEEP MEEP MEEP MEEP MEEP MEEP MEEP
+            # MEEP MEEP MEEP MEEP MEEP MEEP MEEP
+            # MEEP MEEP MEEP MEEP MEEP MEEP MEEP
+            kill_the_enemy(cli, ev, filt)
+            
+    # Join filter
     try:
         _USERDB[ev.source]
         _USERDB[ev.source]['channels'].append(ev.target.lower())
@@ -183,7 +230,7 @@ def joinfilter(cli, ev):
         _USERDB[ev.source] = {}
         _USERDB[ev.source]['channels'] = [ev.target.lower()]
     
-    for filt in ChanFilter.select().where(ChanFilter.Type == "channel"):
+    for filt in ChanFilter.select():
         content = json.loads(filt.content)
         if set(_USERDB[ev.source]['channels']) == set(content) and ev.source.nick != cli.nickname:
             regex = re.compile(filt.hostmask)
@@ -218,6 +265,8 @@ def kill_the_enemy(cli, ev, tfilter):
         codename = "c" + str(tfilter.id)
     elif tfilter.Type == "message":
         codename = "m" + str(tfilter.id)
+    elif tfilter.Type == "hostmask":
+        codename = "h" + str(tfilter.id)
     
     cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter.label))
 
