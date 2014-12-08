@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # <config>
-NICKNAME = "ferdus"
+NICKNAME = "ferdus-"
 NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
@@ -144,7 +144,12 @@ def publmsg(cli, ev):
             cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
     except:
         _PARROT[ev.target] = False
-    if cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN and _PARROT[ev.target] == False:
+    
+    if _PARROT[ev.target] is False:
+        check_parrot(cli, ev)
+        
+def check_parrot(cli, ev):
+    if cli.nickname in ev.arguments[0] and ev.target != CONTROLCHAN and _PARROT[ev.target] is False:
         cli.privmsg(CONTROLCHAN, "Highlighted on \002{0}\002. Activating parrot mode for 5 minutes.".format(ev.target))
         cli.privmsg(CONTROLCHAN, "[\002{0}\002] <{1}> {2}".format(ev.target, ev.source, ev.arguments[0]))
         _PARROT[ev.target] = True
