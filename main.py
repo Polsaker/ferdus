@@ -32,7 +32,7 @@ database = peewee.SqliteDatabase('ferdus.db')
 database.connect()
 
 connection = client.IRCClient("ferdus")
-connection.configure(IRCSERVER, 6667, NICKNAME, NICKNAME, "realname", localaddress=BINDTO)
+connection.configure(IRCSERVER, 6667, NICKNAME, NICKNAME, "realname", localaddress=BINDTO, msgdelay=0.7)
 
 # ---- DATABASE STUFF ----
 
