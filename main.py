@@ -169,6 +169,8 @@ def label(cli, ev):
         filt = ChanFilter.get(ChanFilter.id == ev.splitd[1][1:])
     elif ev.splitd[1][0] == "m":
         filt = MsgFilter.get(MsgFilter.id == ev.splitd[1][1:])
+    elif ev.splitd[1][0] == "h":
+        filt = HostMaskFilter.get(HostMaskFilter.id == ev.splitd[1][1:])
     filt.label = " ".join(ev.splitd[2:])
     filt.save()
     cli.privmsg(CONTROLCHAN, "\002{0}\002 labeled.".format(ev.splitd[1]))
