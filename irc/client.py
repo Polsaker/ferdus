@@ -54,6 +54,7 @@ class IRCClient:
         self.addhandler("kick", self._on_kick)
         self.addhandler("banlist", self._on_banlist)
         self.addhandler("kick", self._on_kick)
+        self.addhandler("nick", self._on_nick)
 
     def configure(self, server=server, port=port, nick=nickname, ident=nickname,
                 gecos=gecos, ssl=ssl, msgdelay=msgdelay, reconnects=reconnects,
@@ -449,6 +450,14 @@ class IRCClient:
             try:
                 del self.channels[i].users[event.source.nick]
                 self._fire_event(Event("cquit", event.source, i, event.arguments))
+            except:
+                pass
+    
+    def _on_nick(self, myself, event):
+        for i in self.channels:
+            try:
+                self.channels[i].users[event.target] = self.channels[i].users[event.source.nick]
+                del self.channels[i].users[event.source.nick]
             except:
                 pass
 
