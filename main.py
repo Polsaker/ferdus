@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # <config>
-NICKNAME = "ferdus-"
+NICKNAME = "ferdus"
 NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
 BINDTO = ""
 
-TRUST = ["wikimedia/Polsaker"]
+TRUST = ["wikimedia/Polsaker", "unaffiliated/dissidentrage"]
 # </config>
 
 import logging
@@ -313,6 +313,14 @@ def kill_the_enemy(cli, ev, tfilter):
 
 # --- parrot ---
 def parrot(cli, ev, k=False):
+    if ev.type == "nick":
+        for i in _PARROT:
+            try:
+                cli.channels[i][ev.target]
+            except:
+                return
+            if _PARROT[i] is True:
+                cli.privmsg(CONTROLCHAN, "\002{0}\002 => \002{1}\002".format(ev.source2.nick, ev.target))
     try:
         if _PARROT[ev.target] is not True:
             if cli.nickname in " ".join(ev.arguments) and not k and ev.target != CONTROLCHAN:
@@ -358,6 +366,7 @@ connection.addhandler("pubnotice", parrot)
 connection.addhandler("join", parrot)
 connection.addhandler("part", parrot)
 connection.addhandler("cquit", parrot)
+connection.addhandler("nick", parrot)
 
 
 
