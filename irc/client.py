@@ -6,11 +6,6 @@ import re
 import time
 from . import numerics
 from . import features
-try:
-    import chardet
-    __CHARDET_ENABLED = True
-except:
-    __CHARDET_ENABLED = False
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[" +
                                       "^ ]+)( *(?P<argument> .+))?")
@@ -228,8 +223,9 @@ class IRCClient:
             return False
 
         self.ibuffer.feed(new_data)
-
-        for line in self.ibuffer.lines():
+        
+        ilikepotatoes = self.ibuffer.lines()
+        for line in ilikepotatoes:
             if not line:
                 continue
             self.logger.debug(line)
