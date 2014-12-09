@@ -223,19 +223,14 @@ class IRCClient:
             return False
 
         self.ibuffer.feed(new_data)
-        
-        try:
-            pline = bytes()
-            for line in self.ibuffer._lines():
-                pline += line
-            x = pline.decode('utf-8')
-        except UnicodeDecodeError:
-            pline = bytes()
-            for line in self.ibuffer._lines():
-                pline += line
-            x = pline.decode('latin1')
-                
-        for line in x:
+        pline = []
+        for line in self.ibuffer._lines():
+            pline.append(line)
+        for line in pline:
+            try:
+                line = line.decode('utf-8')
+            except:
+                line = line.decode('latin1')
             if not line:
                 continue
             self.logger.debug(line)
