@@ -318,7 +318,7 @@ def parrot(cli, ev, k=False):
     if ev.type == "nick":
         for i in _PARROT:
             try:
-                cli.channels[i][ev.target]
+                cli.channels[i].users[ev.target]
             except:
                 return
             if _PARROT[i] is True:
