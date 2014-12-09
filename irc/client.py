@@ -224,8 +224,14 @@ class IRCClient:
 
         self.ibuffer.feed(new_data)
         
-        ilikepotatoes = self.ibuffer.lines()
-        for line in ilikepotatoes:
+        try:
+            x = (line.decode('utf-8')
+                for line in self.ibuffer._lines())
+        except UnicodeDecodeError:
+            x = (line.decode('latin1')
+                for line in self.ibuffer._lines())
+                
+        for line in x:
             if not line:
                 continue
             self.logger.debug(line)
