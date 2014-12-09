@@ -6,6 +6,11 @@ import re
 import time
 from . import numerics
 from . import features
+try:
+    import chardet
+    __CHARDET_ENABLED = True
+except:
+    __CHARDET_ENABLED = False
 
 _rfc_1459_command_regexp = re.compile("^(:(?P<prefix>[^ ]+) +)?(?P<command>[" +
                                       "^ ]+)( *(?P<argument> .+))?")
@@ -591,12 +596,21 @@ class LineBuffer(object):
     def feed(self, byte):
         self.buffer += byte
 
-    encoding = 'utf-8'
-    errors = 'replace'
-
     def lines(self):
-        return (line.decode(self.encoding, self.errors)
-            for line in self._lines())
+        try:
+            return (line.decode('utf-8')
+                for line in self._lines())
+        except:
+            try:
+                return (line.decode('latin1')
+                    for line in self._lines())
+            except:
+                if __CHARDET_ENABLED:
+                    return (line.decode(chardet.detect(line)['encoding'])
+                        for line in self._lines())
+                else:
+                    return (line.decode('utf-8', 'replace')
+                        for line in self._lines())
 
     def _lines(self):
         lines = self.line_sep_exp.split(self.buffer)
