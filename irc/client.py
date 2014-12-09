@@ -225,11 +225,15 @@ class IRCClient:
         self.ibuffer.feed(new_data)
         
         try:
-            x = (line.decode('utf-8')
-                for line in self.ibuffer._lines())
+            pline = ""
+            for line in self.ibuffer._lines():
+                pline += line
+            x = pline.decode('utf-8')
         except UnicodeDecodeError:
-            x = (line.decode('latin1')
-                for line in self.ibuffer._lines())
+            pline = ""
+            for line in self.ibuffer._lines():
+                pline += line
+            x = pline.decode('latin1')
                 
         for line in x:
             if not line:
