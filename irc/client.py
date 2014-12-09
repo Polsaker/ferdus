@@ -229,7 +229,7 @@ class IRCClient:
 
         self.ibuffer.feed(new_data)
 
-        for line in self.ibuffer:
+        for line in self.ibuffer.lines():
             if not line:
                 continue
             self.logger.debug(line)
@@ -601,16 +601,8 @@ class LineBuffer(object):
             x = (line.decode('utf-8')
                 for line in self._lines())
         except UnicodeDecodeError:
-            try:
-                x = (line.decode('latin1')
-                    for line in self._lines())
-            except:
-                if __CHARDET_ENABLED:
-                    x = (line.decode(chardet.detect(line)['encoding'])
-                        for line in self._lines())
-                else:
-                    x = (line.decode('utf-8', 'replace')
-                        for line in self._lines())
+            x = (line.decode('latin1')
+                for line in self._lines())
         return x
 
     def _lines(self):
