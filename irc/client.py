@@ -598,19 +598,20 @@ class LineBuffer(object):
 
     def lines(self):
         try:
-            return (line.decode('utf-8')
+            x = (line.decode('utf-8')
                 for line in self._lines())
-        except:
+        except UnicodeDecodeError:
             try:
-                return (line.decode('latin1')
+                x = (line.decode('latin1')
                     for line in self._lines())
             except:
                 if __CHARDET_ENABLED:
-                    return (line.decode(chardet.detect(line)['encoding'])
+                    x = (line.decode(chardet.detect(line)['encoding'])
                         for line in self._lines())
                 else:
-                    return (line.decode('utf-8', 'replace')
+                    x = (line.decode('utf-8', 'replace')
                         for line in self._lines())
+        return x
 
     def _lines(self):
         lines = self.line_sep_exp.split(self.buffer)
