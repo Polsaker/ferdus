@@ -65,6 +65,10 @@ ChanFilter.create_table(True)
 MsgFilter.create_table(True)
 Channel.create_table(True)
 
+__HOSTMASK_FILTERS = HostMaskFilter.select()
+__CHANNEL_FILTERS = ChanFilter.select()
+__MESSAGE_FILTERS = MsgFilter.select()
+
 # ---- IRC STUFF ----
 
 def welcome(client, event): # When we're connected to the irc...
@@ -176,6 +180,9 @@ def label(cli, ev):
     filt.label = " ".join(ev.splitd[2:])
     filt.save()
     cli.privmsg(CONTROLCHAN, "\002{0}\002 labeled.".format(ev.splitd[1]))
+    __HOSTMASK_FILTERS = HostMaskFilter.select()
+    __CHANNEL_FILTERS = ChanFilter.select()
+    __MESSAGE_FILTERS = MsgFilter.select()
 
 def chanpattern(cli, ev):
     try:
@@ -197,6 +204,9 @@ def chanpattern(cli, ev):
         filt = ChanFilter.get(ChanFilter.id == ev.splitd[2])
         filt.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
+    __HOSTMASK_FILTERS = HostMaskFilter.select()
+    __CHANNEL_FILTERS = ChanFilter.select()
+    __MESSAGE_FILTERS = MsgFilter.select()
 
 def msgpattern(cli, ev):
     try:
@@ -216,6 +226,9 @@ def msgpattern(cli, ev):
         filt = MsgFilter.get(MsgFilter.id == ev.splitd[2])
         filt.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
+    __HOSTMASK_FILTERS = HostMaskFilter.select()
+    __CHANNEL_FILTERS = ChanFilter.select()
+    __MESSAGE_FILTERS = MsgFilter.select()
 
 def hostmaskpattern(cli, ev):
     try:
@@ -234,12 +247,15 @@ def hostmaskpattern(cli, ev):
         filt = HostMaskFilter.get(HostMaskFilter.id == ev.splitd[2])
         filt.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
+    __HOSTMASK_FILTERS = HostMaskFilter.select()
+    __CHANNEL_FILTERS = ChanFilter.select()
+    __MESSAGE_FILTERS = MsgFilter.select()
 
 # --- filter processing ---
 def privmsgfilter(cli, ev):
     if ev.target == CONTROLCHAN:
         return
-    for filt in MsgFilter.select():
+    for filt in __MESSAGE_FILTERS:
         regex = re.compile(filt.hostmask)
         if re.search(regex, ev.source):
             regex2 = re.compile(filt.content)
@@ -258,7 +274,7 @@ def joinfilter(cli, ev):
         return
     
     # Hostmask filter:
-    for filt in HostMaskFilter.select():
+    for filt in __HOSTMASK_FILTERS:
         regex = re.compile(filt.hostmask)
         if re.search(regex, ev.source):
             # MEEP MEEP MEEP MEEP MEEP MEEP MEEP
@@ -275,7 +291,7 @@ def joinfilter(cli, ev):
         _USERDB[ev.source] = {}
         _USERDB[ev.source]['channels'] = [ev.target.lower()]
     
-    for filt in ChanFilter.select():
+    for filt in __CHANNEL_FILTERS:
         content = json.loads(filt.content)
         if set(_USERDB[ev.source]['channels']) == set(content) and ev.source.nick != cli.nickname:
             regex = re.compile(filt.hostmask)
@@ -379,3 +395,4 @@ connection.connect()
 
 while connection.connected:
     time.sleep(1)
+    
