@@ -566,7 +566,7 @@ class User(object):
 
     def __repr__(self):
         return "<User nick:'{0}', ident:'{1}', host:'{2}', gecos: '{3}'" \
-               ", op: '{5}', voiced: '{6}', account: '{7}'>" \
+               ", op: '{4}', voiced: '{5}', account: '{6}'>" \
                 .format(self.nick, self.ident, self.host, self.gecos,
                 str(self.op), str(self.voiced), str(self.account))
 

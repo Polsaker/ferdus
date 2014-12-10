@@ -130,6 +130,8 @@ def publmsg(cli, ev):
             cli.notice(ev.splitd[1], " ".join(ev.splitd[2:]))
         elif ev.splitd[0] == ".raw":
             cli.send(" ".join(ev.splitd[1:]))
+        elif ev.splitd[0] == ".eval":
+            cli.privmsg(CONTROLCHAN, eval(" ".join(ev.splitd[1:])))
         elif ev.splitd[0] == ".quit":
             cli.disconnect("Leaving")
         elif ev.splitd[0] == ".parrot":
@@ -318,7 +320,7 @@ def parrot(cli, ev, k=False):
     if ev.type == "nick":
         for i in _PARROT:
             try:
-                cli.channels[i][ev.target]
+                cli.channels[i].users[ev.target]
             except:
                 return
             if _PARROT[i] is True:
