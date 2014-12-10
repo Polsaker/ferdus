@@ -112,6 +112,7 @@ class IRCClient:
     def _process_forever(self):
         while self.connected:
             self._process_data()
+            time.sleep(0.1)
         if self.reconncount <= self.reconnects:
             self.reconncount += 1
             self.connect()
