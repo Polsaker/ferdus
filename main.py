@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # <config>
-NICKNAME = "ferdus-"
+NICKNAME = "ferdus"
 NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
