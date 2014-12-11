@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # <config>
-NICKNAME = "ferdus"
+NICKNAME = "ferdus-"
 NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
@@ -33,6 +33,9 @@ database.connect()
 
 connection = client.IRCClient("ferdus")
 connection.configure(IRCSERVER, 6667, NICKNAME, NICKNAME, "realname", localaddress=BINDTO, msgdelay=1)
+# Sending stuff before connecting (It gets sent when connected)
+connection.send("CAP REQ :sasl")
+connection.send("AUTHENTICATE PLAIN")
 
 # ---- DATABASE STUFF ----
 
@@ -69,21 +72,16 @@ __HOSTMASK_FILTERS = []
 __CHANNEL_FILTERS = []
 __MESSAGE_FILTERS = []
 for i in HostMaskFilter.select():
-    __HOSTMASK_FILTERS.append({"Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
+    __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
 for i in ChanFilter.select():
-    __CHANNEL_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+    __CHANNEL_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
 for i in MsgFilter.select():
-    __MESSAGE_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+    __MESSAGE_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
 # ---- IRC STUFF ----
 
 def welcome(client, event): # When we're connected to the irc...
     _CONNECTED = True
     client.join(CONTROLCHAN) # ... we join the control channel
-    
-def oconnect(client, event): # Phew, we're connecting to the server...
-    # Let's try to do some SASL
-    client.send("CAP REQ :sasl")
-    client.send("AUTHENTICATE PLAIN")
 
 def saslauth(client, event): # Finish sasl authentication
     client.send("AUTHENTICATE {0}".format(
@@ -186,11 +184,11 @@ def label(cli, ev):
     filtq.save()
     cli.privmsg(CONTROLCHAN, "\002{0}\002 labeled.".format(ev.splitd[1]))
     for i in HostMaskFilter.select():
-        __HOSTMASK_FILTERS.append({"Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
+        __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
-        __CHANNEL_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __CHANNEL_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
     for i in MsgFilter.select():
-        __MESSAGE_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __MESSAGE_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
 
 def chanpattern(cli, ev):
     try:
@@ -213,11 +211,11 @@ def chanpattern(cli, ev):
         filtq.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
     for i in HostMaskFilter.select():
-        __HOSTMASK_FILTERS.append({"Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
+        __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
-        __CHANNEL_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __CHANNEL_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
     for i in MsgFilter.select():
-        __MESSAGE_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __MESSAGE_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
 
 def msgpattern(cli, ev):
     try:
@@ -238,11 +236,11 @@ def msgpattern(cli, ev):
         filtq.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
     for i in HostMaskFilter.select():
-        __HOSTMASK_FILTERS.append({"Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
+        __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
-        __CHANNEL_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __CHANNEL_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
     for i in MsgFilter.select():
-        __MESSAGE_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __MESSAGE_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
 
 def hostmaskpattern(cli, ev):
     try:
@@ -262,21 +260,24 @@ def hostmaskpattern(cli, ev):
         filtq.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
     for i in HostMaskFilter.select():
-        __HOSTMASK_FILTERS.append({"Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
+        __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
-        __CHANNEL_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __CHANNEL_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
     for i in MsgFilter.select():
-        __MESSAGE_FILTERS.append({"Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
+        __MESSAGE_FILTERS.append({"id": i.id, "Type": "channel", "label": i.label, "content": i.content, "hostmask": i.hostmask})
 
 # --- filter processing ---
 def privmsgfilter(cli, ev):
     if ev.target == CONTROLCHAN:
         return
     for filt in __MESSAGE_FILTERS:
+        print(filt)
         regex = re.compile(filt['hostmask'])
         if re.search(regex, ev.source):
+            print("OK")
             regex2 = re.compile(filt['content'])
             if re.search(regex2, ev.arguments[0]):
+                print("GOT IT")
                 # OMFGZ!!!!
                 # WE GOT DAE TROLL
                 kill_the_enemy(cli, ev, filt)
@@ -339,11 +340,11 @@ def kill_the_enemy(cli, ev, tfilter):
         ban = "*!*@*{0}".format(ip)
         
     
-    if tfilter.Type == "channel":
+    if tfilter['Type'] == "channel":
         codename = "c" + str(tfilter['id'])
-    elif tfilter.Type == "message":
+    elif tfilter['Type'] == "message":
         codename = "m" + str(tfilter['id'])
-    elif tfilter.Type == "hostmask":
+    elif tfilter['Type'] == "hostmask":
         codename = "h" + str(tfilter['id'])
     
     cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered @ \002{4}\002: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter['label'], ev.target))
@@ -385,7 +386,6 @@ def parrot(cli, ev, k=False):
 
 # --- handler registration ---
 connection.addhandler("welcome", welcome)
-connection.addhandler("connect", oconnect)
 connection.addhandler("authenticate", saslauth)
 connection.addhandler("privmsg", gotmsg)
 connection.addhandler("privnotice", gotmsg)
