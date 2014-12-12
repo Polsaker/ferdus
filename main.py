@@ -183,6 +183,10 @@ def label(cli, ev):
     filtq.label = " ".join(ev.splitd[2:])
     filtq.save()
     cli.privmsg(CONTROLCHAN, "\002{0}\002 labeled.".format(ev.splitd[1]))
+    
+    __HOSTMASK_FILTERS = []
+    __CHANNEL_FILTERS = []
+    __MESSAGE_FILTERS = []
     for i in HostMaskFilter.select():
         __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
@@ -210,6 +214,11 @@ def chanpattern(cli, ev):
         filtq = ChanFilter.get(ChanFilter.id == ev.splitd[2])
         filtq.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
+        
+    __HOSTMASK_FILTERS = []
+    __CHANNEL_FILTERS = []
+    __MESSAGE_FILTERS = []
+    
     for i in HostMaskFilter.select():
         __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
@@ -235,6 +244,11 @@ def msgpattern(cli, ev):
         filtq = MsgFilter.get(MsgFilter.id == ev.splitd[2])
         filtq.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
+        
+    __HOSTMASK_FILTERS = []
+    __CHANNEL_FILTERS = []
+    __MESSAGE_FILTERS = []
+
     for i in HostMaskFilter.select():
         __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():
@@ -259,6 +273,11 @@ def hostmaskpattern(cli, ev):
         filtq = HostMaskFilter.get(HostMaskFilter.id == ev.splitd[2])
         filtq.delete_instance()
         cli.privmsg(CONTROLCHAN, "Filter deleted")
+        
+    __HOSTMASK_FILTERS = []
+    __CHANNEL_FILTERS = []
+    __MESSAGE_FILTERS = []
+
     for i in HostMaskFilter.select():
         __HOSTMASK_FILTERS.append({"id": i.id, "Type": "hostmask", "label": i.label, "hostmask": i.hostmask})
     for i in ChanFilter.select():

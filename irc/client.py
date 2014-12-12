@@ -4,6 +4,7 @@ import _thread
 import socket
 import re
 import time
+import copy
 from . import numerics
 from . import features
 
@@ -462,7 +463,7 @@ class IRCClient:
     def _on_nick(self, myself, event):
         for i in self.channels:
             try:
-                self.channels[i].users[event.target] = self.channels[i].users[event.source.nick]
+                self.channels[i].users[event.target] = copy.copy(self.channels[i].users[event.source.nick])
                 del self.channels[i].users[event.source.nick]
             except:
                 pass
