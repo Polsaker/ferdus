@@ -6,6 +6,7 @@ NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
+ALERTCHAN = "##wowsuchban,#wikipedia-es-ops"
 BINDTO = ""
 
 TRUST = ["wikimedia/Polsaker", "unaffiliated/dissidentrage", "unaffiliated/clinteger"]
@@ -366,7 +367,7 @@ def kill_the_enemy(cli, ev, tfilter):
     elif tfilter['Type'] == "hostmask":
         codename = "h" + str(tfilter['id'])
     
-    cli.notice(CONTROLCHAN, "Filter [\002{0}\002 {3}] triggered @ \002{4}\002: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter['label'], ev.target))
+    cli.notice(ALERTCHAN, "Filter [\002{0}\002 {3}] triggered @ \002{4}\002: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter['label'], ev.target))
 
 # --- parrot ---
 def parrot(cli, ev, k=False):
