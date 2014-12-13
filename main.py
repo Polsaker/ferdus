@@ -8,7 +8,7 @@ IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
 BINDTO = ""
 
-TRUST = ["wikimedia/Polsaker", "unaffiliated/dissidentrage"]
+TRUST = ["wikimedia/Polsaker", "unaffiliated/dissidentrage", "unaffiliated/clinteger"]
 # </config>
 
 import logging
