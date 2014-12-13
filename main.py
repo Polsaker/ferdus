@@ -6,7 +6,7 @@ NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
 CONTROLCHAN = "##wowsuchban"
-ALERTCHAN = "##wowsuchban,#wikipedia-es-ops"
+ALERTCHAN = ["##wowsuchban", "#wikipedia-es-ops"]
 BINDTO = ""
 
 TRUST = ["wikimedia/Polsaker", "unaffiliated/dissidentrage", "unaffiliated/clinteger"]
@@ -290,6 +290,8 @@ def hostmaskpattern(cli, ev):
 def privmsgfilter(cli, ev):
     if ev.target == CONTROLCHAN:
         return
+    if ev.target in ALERTCHAN:
+        return
     for filt in __MESSAGE_FILTERS:
         print(filt)
         regex = re.compile(filt['hostmask'])
@@ -309,6 +311,8 @@ def joinfilter(cli, ev):
     if ev.target == CONTROLCHAN:
         for channel in Channel.select():
             cli.join(channel.name)
+        return
+    if ev.target in ALERTCHAN:
         return
     
     # Hostmask filter:
@@ -367,10 +371,13 @@ def kill_the_enemy(cli, ev, tfilter):
     elif tfilter['Type'] == "hostmask":
         codename = "h" + str(tfilter['id'])
     
-    cli.notice(ALERTCHAN, "Filter [\002{0}\002 {3}] triggered @ \002{4}\002: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter['label'], ev.target))
+    for chan in ALERTCHAN:
+        cli.notice(chan, "Filter [\002{0}\002 {3}] triggered @ \002{4}\002: \037{1}\037 ||| BAN: {2}".format(codename, ev.source2, ban, tfilter['label'], ev.target))
 
 # --- parrot ---
 def parrot(cli, ev, k=False):
+    if ev.target in ALERTCHAN:
+        return
     if ev.type == "nick":
         for i in _PARROT:
             try:
