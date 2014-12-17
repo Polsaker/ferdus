@@ -293,13 +293,13 @@ def privmsgfilter(cli, ev):
     if ev.target in ALERTCHAN:
         return
     for filt in __MESSAGE_FILTERS:
-        print(filt)
+        #print(filt)
         regex = re.compile(filt['hostmask'])
         if re.search(regex, ev.source):
-            print("OK")
+            #print("OK")
             regex2 = re.compile(filt['content'])
             if re.search(regex2, ev.arguments[0]):
-                print("GOT IT")
+                #print("GOT IT")
                 # OMFGZ!!!!
                 # WE GOT DAE TROLL
                 kill_the_enemy(cli, ev, filt)
