@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # <config>
-NICKNAME = "ferdus"
+NICKNAME = "ferdus-"
 NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
@@ -345,17 +345,25 @@ def joinfilter(cli, ev):
                 kill_the_enemy(cli, ev, filt)
     
     # DNSBL
+    print("BEGIN")
     try:
         ip = socket.gethostbyname(getip(ev))
+        if ip is False:
+            ip = getip(ev)
     except:
         ip = getip(ev)
+    print("RESOLVED")
     ip = '.'.join(ip.split('.')[::-1]) #Reverse the IP address
     try:
+        print(ip + '.dnsbl.hira.cf')
         socket.gethostbyname(ip + '.dnsbl.hira.cf') # Wel... port is the... dnsbl
+        print("SCANNED")
         #self.isproxy = True
         for chan in ALERTCHAN:
-            cli.notice(chan, "\037{1}\037 (@ {0})is on the Hira DNSBL ||| BAN: {2}".format(ev.target, ev.source2, getip(cli, ev)))
+            cli.notice(chan, "\037{1}\037 (@ \002{0}\002) is on the Hira DNSBL ||| BAN: {2}".format(ev.target, ev.source2, getban(cli, ev)))
     except socket.gaierror as p:
+        print("ERRORED")
+        print(p)
         pass
     
 # --- Meat processing ---
