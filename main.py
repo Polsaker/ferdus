@@ -345,7 +345,10 @@ def joinfilter(cli, ev):
                 kill_the_enemy(cli, ev, filt)
     
     # DNSBL
-    ip = socket.gethostbyname(getip(ev))
+    try:
+        ip = socket.gethostbyname(getip(ev))
+    except:
+        ip = getip(ev)
     ip = '.'.join(ip.split('.')[::-1]) #Reverse the IP address
     try:
         socket.gethostbyname(ip + '.dnsbl.hira.cf') # Wel... port is the... dnsbl
