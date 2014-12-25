@@ -343,10 +343,21 @@ def joinfilter(cli, ev):
                 # RED ALERT, RED ALERT: WE HAVE A TROLL IN THE CHANNEL
                 # I REPEAT: WE HAVE A TROLL IN THE CHANNEL
                 kill_the_enemy(cli, ev, filt)
-
+    
+    # DNSBL
+    ip = socket.gethostbyname(ev.source.host)
+    ip = '.'.join(ip.split('.')[::-1]) #Reverse the IP address
+    try:
+        socket.gethostbyname(ip + '.dnsbl.hira.cf') # Wel... port is the... dnsbl
+        #self.isproxy = True
+        for chan in ALERTCHAN:
+            cli.notice(chan, "\037{1}\037 is on the Hira DNSBL ||| BAN: {2}".format(ev.source2, getip(cli, ev)))
+    except socket.gaierror as p:
+        pass
+    
 # --- Meat processing ---
 
-def kill_the_enemy(cli, ev, tfilter):
+def getip(cli, ev):
     # Freenode stuff, get the actual ip, removing the gateway stuff
     if "gateway/web/cgi-irc" in ev.source2 or "gateway/web/freenode" in ev.source2:
         ban = "*!*@*" + ev.source2.split("/ip.")[-1]
@@ -362,8 +373,11 @@ def kill_the_enemy(cli, ev, tfilter):
     else:
         ip = str(socket.gethostbyname(ev.source2.host))
         ban = "*!*@*{0}".format(ip)
-        
     
+    return ban
+        
+def kill_the_enemy(cli, ev, tfilter):
+    ban = getip(cli, ev)
     if tfilter['Type'] == "channel":
         codename = "c" + str(tfilter['id'])
     elif tfilter['Type'] == "message":
