@@ -371,7 +371,7 @@ def getip(ev):
     return ip
     
 def getban(cli, ev):
-    ip = getip(cli, ev)
+    ip = getip(ev)
     # Freenode stuff, get the actual ip, removing the gateway stuff
     if "gateway/web/cgi-irc" in ev.source2 or "gateway/web/freenode" in ev.source2:
         ban = "*!*@*" + ip
