@@ -345,22 +345,33 @@ def joinfilter(cli, ev):
                 kill_the_enemy(cli, ev, filt)
     
     # DNSBL
-    ip = socket.gethostbyname(ev.source.host)
+    ip = socket.gethostbyname(getip(ev))
     ip = '.'.join(ip.split('.')[::-1]) #Reverse the IP address
     try:
         socket.gethostbyname(ip + '.dnsbl.hira.cf') # Wel... port is the... dnsbl
         #self.isproxy = True
         for chan in ALERTCHAN:
-            cli.notice(chan, "\037{1}\037 is on the Hira DNSBL ||| BAN: {2}".format(ev.source2, getip(cli, ev)))
+            cli.notice(chan, "\037{1}\037 (@ {0})is on the Hira DNSBL ||| BAN: {2}".format(ev.target, ev.source2, getip(cli, ev)))
     except socket.gaierror as p:
         pass
     
 # --- Meat processing ---
 
-def getip(cli, ev):
+
+def getip(ev):
+    if "gateway/web/cgi-irc" in ev.source2 or "gateway/web/freenode" in ev.source2:
+        ip = "*" + ev.source2.split("/ip.")[-1]
+    elif "/" in ev.source2.host:
+        return False
+    else:
+        ip = str(socket.gethostbyname(ev.source2.host))
+    return ip
+    
+def getban(cli, ev):
+    ip = getip(cli, ev)
     # Freenode stuff, get the actual ip, removing the gateway stuff
     if "gateway/web/cgi-irc" in ev.source2 or "gateway/web/freenode" in ev.source2:
-        ban = "*!*@*" + ev.source2.split("/ip.")[-1]
+        ban = "*!*@*" + ip
     elif "gateway/tor-sasl/" in ev.source2.host:
         ban = "*!*@*" + ev.source2.host[17:]
     elif "gateway/" in ev.source2:
@@ -371,7 +382,6 @@ def getip(cli, ev):
         else:
             ban = "*!*@{0}".format(ev.source2.host)
     else:
-        ip = str(socket.gethostbyname(ev.source2.host))
         ban = "*!*@*{0}".format(ip)
     
     return ban
