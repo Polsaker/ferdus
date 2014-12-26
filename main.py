@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # <config>
-NICKNAME = "ferdus-"
+NICKNAME = "ferdus"
 NSUSER = "ferdus"
 NSPASSWORD = "iamsuperferdus"
 IRCSERVER = "sinisalo.freenode.net"
@@ -370,8 +370,10 @@ def joinfilter(cli, ev):
 
 
 def getip(ev):
+    print(ev.source2)
     if "gateway/web/cgi-irc" in ev.source2 or "gateway/web/freenode" in ev.source2:
-        ip = "*" + ev.source2.split("/ip.")[-1]
+        print("got gateway")
+        ip = ev.source2.split("/ip.")[-1]
     elif "/" in ev.source2.host:
         return False
     else:
